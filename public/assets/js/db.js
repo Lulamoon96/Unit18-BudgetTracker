@@ -18,7 +18,7 @@ request.onerror = function(event) {
   console.log("Error occured: " + event.target.errorCode)
 };
 
-saveRecord = record => {
+export function saveRecord(record) {
 
   const transaction = db.transaction(["pending"], "readwrite")
   const store = transaction.objectStore("pending")
@@ -26,7 +26,7 @@ saveRecord = record => {
 
 }
 
-checkDatabase = () => {
+export function checkDatabase() {
 
   const transaction = db.transaction(["pending"], "readwrite")
   const store = transaction.objectStore("pending")
