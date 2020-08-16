@@ -1,18 +1,8 @@
-let transactions = [];
-let myChart;
+let transactions = []
+let myChart
 
-fetch("/api/transaction")
-  .then(response => {
-    return response.json();
-  })
-  .then(data => {
-    // save db data on global variable
-    transactions = data;
 
-    populateTotal();
-    populateTable();
-    populateChart();
-  });
+import { saveRecord } from "./db"
 
 function populateTotal() {
   // reduce transaction amounts to a single total value
@@ -25,57 +15,57 @@ function populateTotal() {
 }
 
 function populateTable() {
-  let tbody = document.querySelector("#tbody");
-  tbody.innerHTML = "";
+let tbody = document.querySelector("#tbody");
+tbody.innerHTML = "";
 
-  transactions.forEach(transaction => {
-    // create and populate a table row
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${transaction.name}</td>
-      <td>${transaction.value}</td>
-    `;
+transactions.forEach(transaction => {
+  // create and populate a table row
+  let tr = document.createElement("tr");
+  tr.innerHTML = `
+  <td>${transaction.name}</td>
+  <td>${transaction.value}</td>
+  `;
 
-    tbody.appendChild(tr);
-  });
+  tbody.appendChild(tr);
+});
 }
 
 function populateChart() {
-  // copy array and reverse it
-  let reversed = transactions.slice().reverse();
-  let sum = 0;
+// copy array and reverse it
+let reversed = transactions.slice().reverse();
+let sum = 0;
 
-  // create date labels for chart
-  let labels = reversed.map(t => {
-    let date = new Date(t.date);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-  });
+// create date labels for chart
+let labels = reversed.map(t => {
+  let date = new Date(t.date);
+  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+});
 
-  // create incremental values for chart
-  let data = reversed.map(t => {
-    sum += parseInt(t.value);
-    return sum;
-  });
+// create incremental values for chart
+let data = reversed.map(t => {
+  sum += parseInt(t.value);
+  return sum;
+});
 
-  // remove old chart if it exists
-  if (myChart) {
-    myChart.destroy();
+// remove old chart if it exists
+if (myChart) {
+  myChart.destroy();
+}
+
+let ctx = document.getElementById("myChart").getContext("2d");
+
+myChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+      labels,
+      datasets: [{
+          label: "Total Over Time",
+          fill: true,
+          backgroundColor: "#6666ff",
+          data
+      }]
   }
-
-  let ctx = document.getElementById("myChart").getContext("2d");
-
-  myChart = new Chart(ctx, {
-    type: 'line',
-      data: {
-        labels,
-        datasets: [{
-            label: "Total Over Time",
-            fill: true,
-            backgroundColor: "#6666ff",
-            data
-        }]
-    }
-  });
+});
 }
 
 function sendTransaction(isAdding) {
@@ -143,6 +133,19 @@ function sendTransaction(isAdding) {
     amountEl.value = "";
   });
 }
+
+fetch("/api/transaction")
+  .then(response => {
+    return response.json();
+  })
+  .then(data => {
+    // save db data on global variable
+    transactions = data;
+
+    populateTotal();
+    populateTable();
+    populateChart();
+  });
 
 document.querySelector("#add-btn").onclick = function() {
   sendTransaction(true);
